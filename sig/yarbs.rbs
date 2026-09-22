@@ -1,0 +1,14 @@
+module Yarbs
+  class Error < StandardError
+  end
+
+  # Generates .rbs signature files for the Ruby source files matched by
+  # +patterns+, writing them into +output_dir+.
+  #
+  # @param patterns [Array<String>] glob patterns for Ruby source files
+  # @param output_dir [String] directory to write generated .rbs files into
+  # @param strict [Boolean] raise a {Yarbs::Error} instead of skipping a file
+  #   or falling back to +untyped+ when something can't be converted
+  # @return [Array<Pathname>] paths of the files written
+  def self.generate: (Array[String] patterns, ?output_dir: String, ?strict: bool) -> Array[Pathname]
+end

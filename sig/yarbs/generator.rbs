@@ -1,0 +1,35 @@
+module Yarbs
+  # Orchestrates a full run: expands the glob patterns, loads YARD
+  # documentation for the matched files, and writes an annotated +.rbs+ file
+  # per source file into the output directory.
+  class Generator
+    @output_dir: untyped
+
+    @strict: untyped
+
+    # Runs a full generation pass for the given glob patterns.
+    #
+    # @param patterns [Array<String>] glob patterns for Ruby source files
+    # @param output_dir [String] directory to write generated .rbs files into
+    # @param strict [Boolean] raise instead of skipping a file or falling
+    #   back to +untyped+ when something can't be converted
+    # @return [Array<Pathname>] paths of the files written
+    def self.run: (untyped patterns, ?output_dir: ::String, ?strict: bool) -> untyped
+
+    def initialize: (untyped output_dir, ?bool strict) -> void
+
+    def run: (untyped patterns) -> (::Array[untyped] | untyped)
+
+    private
+
+    # A single file with a (possibly transient, e.g. mid-edit) syntax error
+    # shouldn't stop the rest of the batch from generating: skip it and warn,
+    # unless running in strict mode, where it's treated as a hard failure.
+    def generate_file: (untyped file) -> untyped
+
+    # Mirrors the source file's path under the output directory, stripping a
+    # leading `lib/` or `app/` (the conventional Ruby load-path roots) so
+    # `lib/foo/bar.rb` becomes `<output_dir>/foo/bar.rbs`.
+    def relative_sig_path: (untyped file) -> untyped
+  end
+end

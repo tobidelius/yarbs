@@ -1,0 +1,13 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+/.gem_rbs_collection/
+/Gemfile.lock
+/.ruby-lsp/
+.AGENTS
+.CLAUDE

@@ -1,0 +1,36 @@
+module Yarbs
+  # Converts YARD type strings (e.g. "Array<String>", "Boolean") into RBS
+  # types, falling back to +untyped+ for anything that doesn't map cleanly.
+  module TypeConverter
+    UNTYPED: untyped
+
+    # Converts a YARD tag's type list into a single RBS type.
+    #
+    # @param yard_types [Array<String>, nil] the raw strings from a YARD
+    #   tag's +types+ (e.g. +["String", "nil"]+ for +@param [String, nil]+)
+    # @param strict [Boolean] raise instead of falling back to +untyped+
+    #   when a type can't be converted
+    # @return [RBS::Types::t] the best matching RBS type, or +untyped+
+    def self.convert: (Array[String] | nil yard_types, ?strict: bool) -> RBS::Types::t
+
+    # `Proc<(ArgType, ...), ReturnType>` -> `^(ArgType, ...) -> ReturnType`,
+    # RBS's proc-literal type (a real, typed callable signature).
+    #
+    # YARD's own tag parser mangles a literal `->` written inside
+    # `@param [...]` brackets, so this convention avoids the arrow entirely.
+    PROC_TYPE: ::Regexp
+
+    # Rewrites a single YARD type string into RBS syntax, best-effort.
+    #
+    # @param type [String] a single YARD type string
+    # @return [String] the same type rewritten using RBS syntax, best-effort
+    def self.rewrite: (String type) -> String
+
+    # Splits on top-level commas only, respecting `<>`/`{}`/`()`/`[]`
+    # nesting, so e.g. `Array<String>, Integer` splits into two, not three.
+    #
+    # @param str [String]
+    # @return [Array<String>]
+    def self.split_top_level: (String str) -> Array[String]
+  end
+end

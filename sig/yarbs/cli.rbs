@@ -1,0 +1,10 @@
+module Yarbs
+  # The `yarbs` command line executable.
+  module CLI
+    # Parses ARGV and runs yarbs from the command line.
+    #
+    # @param argv [Array<String>]
+    # @return [void]
+    def self.run: (Array[String] argv) -> void
+  end
+end

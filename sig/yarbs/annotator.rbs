@@ -1,0 +1,75 @@
+module Yarbs
+  # Walks an +RBS::AST::Declarations+ tree produced by {PrototypeBuilder} and
+  # fills in its +untyped+ placeholders with types read from the matching
+  # YARD documentation (already loaded into +YARD::Registry+).
+  class Annotator
+    @strict: untyped
+
+    # Fills in the +untyped+ placeholders in a decls tree using YARD documentation.
+    #
+    # @param decls [Array<RBS::AST::Declarations::t>]
+    # @param strict [Boolean] raise instead of falling back to +untyped+
+    #   when a YARD type can't be converted
+    # @return [Array<RBS::AST::Declarations::t>] a new tree with YARD-derived types merged in
+    def self.annotate: (Array[RBS::AST::Declarations::t] decls, ?strict: bool) -> Array[RBS::AST::Declarations::t]
+
+    def initialize: (untyped strict) -> void
+
+    def visit_all: (untyped decls, untyped namespace) -> untyped
+
+    def visit: (untyped decl, untyped namespace) -> untyped
+
+    private
+
+    def annotate_constant: (untyped decl, untyped namespace) -> untyped
+
+    def annotate_method: (untyped member, untyped namespace) -> untyped
+
+    def annotate_attribute: (untyped member, untyped namespace) -> untyped
+
+    def annotate_overload: (untyped overload, untyped yard_method) -> untyped
+
+    def annotate_function: (untyped function, untyped yard_method) -> untyped
+
+    def annotate_block: (untyped block, untyped yard_method) -> untyped
+
+    def annotate_block_function: (untyped function, untyped yield_params, untyped new_return_type) -> untyped
+
+    # There's no arity to preserve here, but if `@yieldparam` tags exist we
+    # at least know the documented shape, so build a full positional-only
+    # `Function` from them instead of leaving the block's params untyped.
+    def annotate_untyped_block_function: (untyped function, untyped yield_params, untyped new_return_type) -> untyped
+
+    # Applies the type documented for a single structural parameter.
+    #
+    # @param unwrap [Symbol, nil] for a rest parameter (`*args`/`**kwargs`),
+    #   YARD conventionally documents the *collected* type (`Array<String>`,
+    #   `Hash{Symbol => String}`), but RBS's `*`/`**` types describe a single
+    #   element instead, so one layer of `Array`/`Hash` is stripped back off.
+    def annotate_param: (untyped param, untyped params, untyped options, ?unwrap: Symbol | nil) -> untyped
+
+    def unwrap_rest_type: (untyped type, untyped unwrap) -> untyped
+
+    def annotate_keywords: (untyped keywords, untyped params, untyped options) -> untyped
+
+    def param_types_by_name: (untyped yard_method) -> untyped
+
+    # Builds an `RBS::Types::Record` (`{ key: Type, ?key2: Type2 }`) for each
+    # parameter documented with YARD `@option` tags, keyed by that
+    # parameter's name.
+    #
+    # e.g. `@option opts [String] :subject` contributes a `:subject` field
+    # to the record built for the `opts` parameter. Every field is
+    # optional, since that's what an options hash means: you're never
+    # required to pass any particular key.
+    def option_records_by_name: (untyped yard_method) -> untyped
+
+    def return_type_for: (untyped function, untyped yard_method) -> untyped
+
+    def return_types_of: (untyped yard_object) -> (::Array[untyped] | untyped)
+
+    def convert: (untyped types) -> untyped
+
+    def safe_symbol: (untyped name) -> (nil | untyped)
+  end
+end
