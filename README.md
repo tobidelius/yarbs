@@ -1,6 +1,6 @@
 # Yarbs
 
-[![Ruby](https://github.com/tobidelius/yarbs/actions/workflows/main.yml/badge.svg)](https://github.com/tobidelius/yarbs/actions/workflows/main.yml)
+[![CI](https://github.com/tobidelius/yarbs/actions/workflows/ci.yml/badge.svg)](https://github.com/tobidelius/yarbs/actions/workflows/ci.yml)
 
 *This is still experimental.*
 
