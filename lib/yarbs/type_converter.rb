@@ -21,7 +21,8 @@ module Yarbs
       source = yard_types.map { |type| rewrite(type) }.join(" | ")
 
       begin
-        RBS::Parser.parse_type(source, require_eof: true) || UNTYPED
+        type = RBS::Parser.parse_type(source, require_eof: true)
+        type ? fit_generic_args(type) : UNTYPED
       rescue RBS::ParsingError => e
         message = "yarbs: could not convert YARD type `#{yard_types.join(", ")}` to RBS (#{e.message})"
         raise Error, message if strict
@@ -30,6 +31,44 @@ module Yarbs
         UNTYPED
       end
     end
+
+    # Number of type parameters for the core generic classes, which YARD
+    # lets you write with any number of arguments (or none) but RBS doesn't.
+    GENERIC_ARITY = {
+      Array: 1,
+      Set: 1,
+      Range: 1,
+      Enumerable: 1,
+      Enumerator: 2,
+      Hash: 2
+    }.freeze
+    private_constant :GENERIC_ARITY
+
+    # Fits the arguments of core generics to what RBS expects, recursively:
+    #
+    # - bare `Array`/`Hash` -> `Array[untyped]`/`Hash[untyped, untyped]`
+    # - missing trailing arguments are filled with `untyped`
+    #
+    # @param type [RBS::Types::t]
+    # @return [RBS::Types::t]
+    def self.fit_generic_args(type)
+      case type
+      when RBS::Types::ClassInstance
+        args = type.args.map { |arg| fit_generic_args(arg) }
+        arity = type.name.namespace.path.empty? ? GENERIC_ARITY[type.name.name] : nil
+
+        if arity && args.size < arity
+          args += Array.new(arity - args.size, UNTYPED)
+        end
+
+        RBS::Types::ClassInstance.new(name: type.name, args: args, location: type.location)
+      when RBS::Types::Union, RBS::Types::Intersection, RBS::Types::Optional, RBS::Types::Tuple, RBS::Types::Record, RBS::Types::Proc
+        type.map_type { |inner| fit_generic_args(inner) }
+      else
+        type
+      end
+    end
+    private_class_method :fit_generic_args
 
     # `Proc<(ArgType, ...), ReturnType>` -> `^(ArgType, ...) -> ReturnType`,
     # RBS's proc-literal type (a real, typed callable signature).

@@ -147,7 +147,7 @@ class GeneratorTest < Minitest::Test
         Yarbs.generate(["lib/**/*.rb"], output_dir: "sig", strict: true)
         contents = File.read("sig/mailer.rbs")
 
-        assert_includes contents, "def send_message: (**Hash opts) -> void"
+        assert_includes contents, "def send_message: (**untyped opts) -> void"
       end
     end
   end

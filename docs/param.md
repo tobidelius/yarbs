@@ -182,11 +182,27 @@ end
 ```
 
 ```rbs
-def send_message: (**Hash opts) -> void
+def send_message: (**untyped opts) -> void
 ```
+
+A bare `Hash` is filled in as `Hash[untyped, untyped]` (see
+[Generic types](#generic-types)), so unwrapping the rest keyword leaves
+`untyped`.
 
 If you need per-key types on a `**opts` method, document its individual
 keyword parameters directly instead of using `**opts` + `@option`.
+
+## Generic types
+
+YARD is loose about type arguments, RBS isn't. For the core generics
+(`Array`, `Set`, `Range`, `Enumerable`, `Enumerator` and `Hash`) yarbs fits
+the arguments to what RBS expects, anywhere in a type:
+
+| YARD | RBS |
+| --- | --- |
+| `Array` | `Array[untyped]` |
+| `Hash` | `Hash[untyped, untyped]` |
+| `Enumerator<String>` | `Enumerator[String, untyped]` |
 
 ## What if a parameter isn't documented?
 
