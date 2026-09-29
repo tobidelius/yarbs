@@ -47,6 +47,8 @@ module Yarbs
     # Fits the arguments of core generics to what RBS expects, recursively:
     #
     # - bare `Array`/`Hash` -> `Array[untyped]`/`Hash[untyped, untyped]`
+    # - `Array<String, Regexp>` (YARD for "Strings or Regexps") ->
+    #   `Array[String | Regexp]`
     # - missing trailing arguments are filled with `untyped`
     #
     # @param type [RBS::Types::t]
@@ -57,8 +59,12 @@ module Yarbs
         args = type.args.map { |arg| fit_generic_args(arg) }
         arity = type.name.namespace.path.empty? ? GENERIC_ARITY[type.name.name] : nil
 
-        if arity && args.size < arity
-          args += Array.new(arity - args.size, UNTYPED)
+        if arity
+          if arity == 1 && args.size > 1
+            args = [RBS::Types::Union.new(types: args, location: nil)]
+          elsif args.size < arity
+            args += Array.new(arity - args.size, UNTYPED)
+          end
         end
 
         RBS::Types::ClassInstance.new(name: type.name, args: args, location: type.location)

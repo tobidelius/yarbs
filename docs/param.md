@@ -202,7 +202,11 @@ the arguments to what RBS expects, anywhere in a type:
 | --- | --- |
 | `Array` | `Array[untyped]` |
 | `Hash` | `Hash[untyped, untyped]` |
+| `Array<String, Regexp>` | `Array[String \| Regexp]` |
 | `Enumerator<String>` | `Enumerator[String, untyped]` |
+
+In YARD, `Array<String, Regexp>` means an array whose elements are Strings
+or Regexps, which in RBS is a single union argument.
 
 ## What if a parameter isn't documented?
 
