@@ -1,0 +1,76 @@
+module Yarbs
+  module CLI
+    # `yarbs init`: sets a project up to use yarbs with Steep, so the
+    # signatures it writes are actually checked.
+    #
+    # Every step is safe to re-run: files that already exist are left alone
+    # (and reported as skipped), and `.gitignore` only gets the entries it's
+    # missing.
+    class Init
+      @paths: untyped
+
+      @dry_run: untyped
+
+      @install: untyped
+
+      @out: untyped
+
+      STEEPFILE: "Steepfile"
+
+      RBS_COLLECTION: "rbs_collection.yaml"
+
+      GITIGNORE: ".gitignore"
+
+      GEM_RBS_COLLECTION_DIR: "/.gem_rbs_collection/"
+
+      RBS_COLLECTION_LOCK: "/rbs_collection.lock.yaml"
+
+      # Runs every setup step in the current directory.
+      #
+      # @param paths [Array<String>, nil] glob patterns to write into a new
+      #   .yarbs.yml (defaults to +lib/**/*.rb+)
+      # @param dry_run [Boolean] report what would change without writing anything
+      # @param install [Boolean] run +rbs collection install+ afterwards
+      # @param out [IO] where to report each step
+      # @return [void]
+      def self.run: (?paths: untyped?, ?dry_run: bool, ?install: bool, ?out: untyped) -> untyped
+
+      def initialize: (untyped paths, untyped dry_run, untyped install, untyped out) -> void
+
+      def run: () -> (nil | untyped)
+
+      private
+
+      # An existing .yarbs.yml wins over any paths given to `init`, so the
+      # Steepfile always matches what `yarbs` will actually generate.
+      def write_config: () -> untyped
+
+      # @param config [Config]
+      # @return [String]
+      def steepfile: (Config config) -> String
+
+      # @return [String]
+      def rbs_collection: () -> String
+
+      def create_file: (untyped path, untyped contents) -> (nil | untyped)
+
+      # A gem's rbs_collection.lock.yaml is conventionally not committed (its
+      # users resolve their own), but an app should commit it, just like its
+      # Gemfile.lock.
+      def gitignore_entries: () -> untyped
+
+      def update_gitignore: () -> (nil | untyped)
+
+      # `/.gem_rbs_collection/`, `.gem_rbs_collection/` and
+      # `.gem_rbs_collection` all ignore the same thing at the project root,
+      # so compare them without the leading/trailing slash.
+      def normalize_ignore: (untyped line) -> untyped
+
+      def install_collection: () -> untyped
+
+      def generate: (untyped config) -> (nil | untyped)
+
+      def report: (untyped action, untyped message) -> untyped
+    end
+  end
+end

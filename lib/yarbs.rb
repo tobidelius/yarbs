@@ -4,6 +4,7 @@ require "yard"
 require "rbs"
 
 require_relative "yarbs/version"
+require_relative "yarbs/config"
 require_relative "yarbs/type_converter"
 require_relative "yarbs/prototype_builder"
 require_relative "yarbs/annotator"

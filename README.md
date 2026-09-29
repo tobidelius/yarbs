@@ -58,14 +58,62 @@ executing:
 gem install yarbs
 ```
 
-## Usage
+## Getting started
 
-Point yarbs at your source files with one or more glob patterns; it writes
-one `.rbs` file per source file into `sig/` (or `-o DIR` to choose a
-different output directory), mirroring the source layout with a leading
-`lib/`/`app/` stripped:
+In your project, run:
 
 ```bash
+bundle exec yarbs init
+```
+
+```
+  create  .yarbs.yml
+  create  Steepfile
+  create  rbs_collection.yaml
+  update  .gitignore (added /.gem_rbs_collection/)
+     run  rbs collection install
+   wrote  23 files to sig/
+```
+
+This sets up everything needed to type-check against the generated
+signatures:
+
+- `.yarbs.yml` — which files yarbs reads and where it writes (see
+  [Configuration](#configuration))
+- `Steepfile` — a Steep target that checks your sources against `sig/`,
+  with lenient diagnostics to start with, since most code stays `untyped`
+  until it's documented
+- `rbs_collection.yaml` — so Steep gets signatures for the gems you
+  depend on; `init` then runs `rbs collection install` to fetch them (skip
+  that with `--no-install`)
+- `.gitignore` — ignores the downloaded `.gem_rbs_collection/`, and, for a
+  gem (a project with a `*.gemspec`), `rbs_collection.lock.yaml` too; an app
+  should commit that lock file, just like `Gemfile.lock`
+
+Then it generates your signatures for the first time.
+
+It's safe to re-run: `init` never overwrites a file that already exists (it
+reports it as skipped), and only adds the `.gitignore` entries that are
+missing. Use `--dry-run` to see what it would do first. By default it sets
+yarbs up for `lib/**/*.rb`; pass your own globs to change that
+(`yarbs init "lib/**/*.rb" "src/**/*.rb"`).
+
+If Steep isn't in your bundle yet, `init` finishes by telling you to add it:
+
+```bash
+bundle add steep --group development
+bundle exec steep check
+```
+
+## Usage
+
+Run `yarbs` to regenerate your signatures. It writes one `.rbs` file per
+source file into `sig/`, mirroring the source layout with a leading
+`lib/`/`app/` stripped. Without arguments it uses the paths in
+`.yarbs.yml`; give it glob patterns to override them:
+
+```bash
+yarbs
 yarbs "lib/**/*.rb" "app/**/*.rb"
 ```
 
@@ -87,6 +135,26 @@ require "yarbs"
 
 Yarbs.generate(["lib/**/*.rb"], output_dir: "sig", strict: true)
 ```
+
+### Configuration
+
+`.yarbs.yml` (written by `yarbs init`) holds the defaults for a plain
+`yarbs` run. Anything passed on the command line overrides it:
+
+```yaml
+# Glob patterns for the Ruby files to generate signatures for.
+paths:
+  - "lib/**/*.rb"
+
+# Directory the generated .rbs files are written into.
+output: sig
+
+# Raise instead of falling back to `untyped` when a YARD type can't
+# be converted. Ignored by `yarbs --watch`.
+strict: false
+```
+
+Without a `.yarbs.yml`, `yarbs` uses these same defaults.
 
 ### Docs
 

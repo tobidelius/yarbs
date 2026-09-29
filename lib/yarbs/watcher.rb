@@ -18,6 +18,23 @@ module Yarbs
       @output_dir = output_dir
     end
 
+    # The directory a glob pattern searches under: everything before its
+    # first glob character, e.g. "lib/**/*.rb" -> "lib". Used both as the
+    # directory to hand to `Listen.to` and by `yarbs init` for the
+    # Steepfile's `check`.
+    #
+    # @param pattern [String]
+    # @return [String]
+    def self.base_directory(pattern)
+      glob_index = pattern.index(/[*?{\[]/)
+      return File.dirname(pattern) unless glob_index
+
+      prefix = pattern[0...glob_index]
+      return "." if prefix.empty?
+
+      prefix.end_with?("/") ? prefix.chomp("/") : File.dirname(prefix)
+    end
+
     # Starts watching and blocks until interrupted (Ctrl-C).
     #
     # @return [void]
@@ -74,19 +91,7 @@ module Yarbs
     end
 
     def watch_directories
-      @patterns.filter_map { |pattern| base_directory(pattern) }.uniq.select { |dir| Dir.exist?(dir) }
-    end
-
-    # The directory to hand to `Listen.to` for a glob pattern: everything
-    # before its first glob character, e.g. "lib/**/*.rb" -> "lib".
-    def base_directory(pattern)
-      glob_index = pattern.index(/[*?{\[]/)
-      return File.dirname(pattern) unless glob_index
-
-      prefix = pattern[0...glob_index]
-      return "." if prefix.empty?
-
-      prefix.end_with?("/") ? prefix.chomp("/") : File.dirname(prefix)
+      @patterns.filter_map { |pattern| self.class.base_directory(pattern) }.uniq.select { |dir| Dir.exist?(dir) }
     end
   end
 end

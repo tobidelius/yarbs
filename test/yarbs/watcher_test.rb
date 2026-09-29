@@ -4,7 +4,7 @@ require "test_helper"
 
 class WatcherTest < Minitest::Test
   def base_directory(pattern)
-    Yarbs::Watcher.new([pattern], output_dir: "sig").send(:base_directory, pattern)
+    Yarbs::Watcher.base_directory(pattern)
   end
 
   def test_base_directory_strips_the_glob_portion

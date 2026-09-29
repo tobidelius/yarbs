@@ -6,5 +6,11 @@ module Yarbs
     # @param argv [Array<String>]
     # @return [void]
     def self.run: (Array[String] argv) -> void
+
+    # Runs `yarbs init`.
+    #
+    # @param argv [Array<String>] the arguments after `init`
+    # @return [void]
+    def self.init: (Array[String] argv) -> void
   end
 end

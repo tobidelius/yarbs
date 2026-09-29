@@ -1,0 +1,54 @@
+module Yarbs
+  # The settings in a project's +.yarbs.yml+, so that a plain +yarbs+ (or
+  # +yarbs --watch+) knows what to generate without repeating the globs on
+  # every run. Written by +yarbs init+; anything given on the command line
+  # overrides it.
+  class Config
+    @paths: untyped
+
+    @output: untyped
+
+    @strict: untyped
+
+    # The config file yarbs looks for in the current directory.
+    FILE: ".yarbs.yml"
+
+    DEFAULT_PATHS: ::Array["lib/**/*.rb"]
+
+    DEFAULT_OUTPUT: "sig"
+
+    KEYS: ::Array["paths" | "output" | "strict"]
+
+    # @return [Array<String>] glob patterns for Ruby source files
+    attr_reader paths: Array[String]
+
+    # @return [String] directory to write generated .rbs files into
+    attr_reader output: String
+
+    # @return [Boolean] raise instead of falling back to +untyped+
+    attr_reader strict: bool
+
+    # Loads the config file, or the defaults if there isn't one.
+    #
+    # @param path [String] the config file to read
+    # @return [Config]
+    # @raise [Error] if the file isn't valid YAML or has an unknown or
+    #   mistyped setting
+    def self.load: (?String path) -> Config
+
+    # @param paths [Array<String>]
+    # @param output [String]
+    # @param strict [Boolean]
+    def initialize: (?paths: Array[String], ?output: String, ?strict: bool) -> void
+
+    # @param path [String] the config file, for the error message
+    # @return [void]
+    # @raise [Error]
+    def validate!: (String path) -> void
+
+    # The YAML written to a new config file.
+    #
+    # @return [String]
+    def to_yaml: () -> String
+  end
+end

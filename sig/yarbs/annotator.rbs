@@ -33,6 +33,17 @@ module Yarbs
 
     def annotate_block: (untyped block, untyped yard_method) -> untyped
 
+    # `rbs prototype rb` marks an explicit `&block` as required unless the
+    # body checks `block_given?` or only uses the block conditionally, so a
+    # block that's merely captured or forwarded (`other(&block)`) comes out
+    # required. Treat the block as optional when:
+    #
+    # - its `@param` tag includes `nil` (`@param block [Proc, nil]`), or
+    # - the body never `yield`s (the block type is an `UntypedFunction`) and
+    #   no `@yield`/`@yieldparam`/`@yieldreturn` tag documents a contract
+    #   for callers to fulfil.
+    def optional_block?: (untyped block, untyped yard_method) -> bool
+
     def annotate_block_function: (untyped function, untyped yield_params, untyped new_return_type) -> untyped
 
     # There's no arity to preserve here, but if `@yieldparam` tags exist we

@@ -14,6 +14,15 @@ module Yarbs
     # @param output_dir [String] directory to write generated .rbs files into
     def initialize: (Array[String] patterns, output_dir: String) -> void
 
+    # The directory a glob pattern searches under: everything before its
+    # first glob character, e.g. "lib/**/*.rb" -> "lib". Used both as the
+    # directory to hand to `Listen.to` and by `yarbs init` for the
+    # Steepfile's `check`.
+    #
+    # @param pattern [String]
+    # @return [String]
+    def self.base_directory: (String pattern) -> String
+
     # Starts watching and blocks until interrupted (Ctrl-C).
     #
     # @return [void]
@@ -32,9 +41,5 @@ module Yarbs
     def relative_path: (untyped path) -> untyped
 
     def watch_directories: () -> untyped
-
-    # The directory to hand to `Listen.to` for a glob pattern: everything
-    # before its first glob character, e.g. "lib/**/*.rb" -> "lib".
-    def base_directory: (untyped pattern) -> (untyped | ".")
   end
 end
