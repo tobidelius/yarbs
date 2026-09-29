@@ -1,0 +1,13 @@
+# Settings for yarbs (https://github.com/tobidelius/yarbs).
+# Anything passed on the command line overrides these.
+
+# Glob patterns for the Ruby files to generate signatures for.
+paths:
+  - "lib/**/*.rb"
+
+# Directory the generated .rbs files are written into.
+output: sig
+
+# Raise instead of falling back to `untyped` when a YARD type can't
+# be converted. Ignored by `yarbs --watch`.
+strict: false

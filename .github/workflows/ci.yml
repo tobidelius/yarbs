@@ -32,5 +32,18 @@ jobs:
           bundler-cache: true
       - name: Install RBS collection
         run: bundle exec rbs collection install
-      - name: Run the default task
-        run: bundle exec rake
+      # Signatures are generated with the newest Ruby, and older parsers may
+      # produce slightly different output.
+      - name: Check RBS signatures are up to date
+        if: matrix.ruby == '4.0'
+        run: |
+          bundle exec exe/yarbs --strict
+          if [ -n "$(git status --porcelain -- sig)" ]; then
+            git status --short -- sig
+            echo "::error::sig/ is out of date, run 'bundle exec exe/yarbs' and commit the result"
+            exit 1
+          fi
+      - name: Test and lint
+        run: bundle exec rake test standard
+      - name: Type check
+        run: bundle exec steep check
