@@ -134,7 +134,29 @@ module Yarbs
         function
       end
 
-      RBS::Types::Block.new(type: new_function, required: block.required, self_type: block.self_type)
+      required = block.required && !optional_block?(block, yard_method)
+      RBS::Types::Block.new(type: new_function, required: required, self_type: block.self_type)
+    end
+
+    # `rbs prototype rb` marks an explicit `&block` as required unless the
+    # body checks `block_given?` or only uses the block conditionally, so a
+    # block that's merely captured or forwarded (`other(&block)`) comes out
+    # required. Treat the block as optional when:
+    #
+    # - its `@param` tag includes `nil` (`@param block [Proc, nil]`), or
+    # - the body never `yield`s (the block type is an `UntypedFunction`) and
+    #   no `@yield`/`@yieldparam`/`@yieldreturn` tag documents a contract
+    #   for callers to fulfil.
+    def optional_block?(block, yard_method)
+      block_param = yard_method.parameters.find { |name, _| name.to_s.start_with?("&") }&.first
+      return false unless block_param
+
+      name = block_param.to_s.delete_prefix("&")
+      tag = yard_method.tags(:param).find { |param| param.name.to_s.delete_prefix("&") == name }
+      return true if tag&.types&.include?("nil")
+
+      block.type.is_a?(RBS::Types::UntypedFunction) &&
+        %i[yield yieldparam yieldreturn].none? { |tag_name| yard_method.has_tag?(tag_name) }
     end
 
     def annotate_block_function(function, yield_params, new_return_type)

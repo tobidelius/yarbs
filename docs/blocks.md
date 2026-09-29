@@ -59,7 +59,9 @@ written.
 
 If there's no `yield` in the body *and* no `@yieldparam` tags, there's
 nothing to build a signature from at all, so yarbs leaves it fully
-`untyped`:
+`untyped`. With no `yield` and no documented contract the block is also
+treated as optional (`?{ ... }`), since it's most likely just captured or
+forwarded:
 
 ```ruby
 def run_explicit_undocumented(&block)
@@ -68,7 +70,30 @@ end
 ```
 
 ```rbs
-def run_explicit_undocumented: () { (?) -> untyped } -> untyped
+def run_explicit_undocumented: () ?{ (?) -> untyped } -> untyped
+```
+
+## Optional blocks
+
+`rbs prototype rb` marks a block as required unless the method checks
+`block_given?` or only uses the block conditionally. yarbs additionally
+makes an explicit `&block` optional when:
+
+- its `@param` tag includes `nil`, or
+- the body never `yield`s and there are no `@yield`, `@yieldparam` or
+  `@yieldreturn` tags (see above).
+
+```ruby
+# @param block [Proc, nil] called with the progress, if given
+# @yieldparam progress [Integer] percent complete
+# @return [void]
+def run_optional(&block)
+  block&.call(50)
+end
+```
+
+```rbs
+def run_optional: () ?{ (Integer progress) -> untyped } -> void
 ```
 
 ## What about `Proc`/lambda *parameters*?
