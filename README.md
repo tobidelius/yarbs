@@ -102,6 +102,8 @@ see:
   (`@yieldparam`/`@yieldreturn`), and typing a `Proc`/lambda parameter
 - [docs/classes.md](docs/classes.md) — classes, modules, nesting,
   inheritance, mixins, `attr_*`, constants, and visibility
+- [docs/deprecated.md](docs/deprecated.md) — `@deprecated`, turned into
+  `%a{deprecated}` so Steep warns wherever deprecated code is used
 
 ## Development
 

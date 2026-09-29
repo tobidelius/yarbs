@@ -254,4 +254,48 @@ class GeneratorTest < Minitest::Test
       end
     end
   end
+
+  def test_deprecated_tags_become_deprecated_annotations
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        FileUtils.mkdir_p("lib")
+        File.write("lib/legacy.rb", <<~RUBY)
+          # @deprecated Use NewLegacy instead.
+          class Legacy
+            # @deprecated Use #bar instead,
+            #   it's faster.
+            # @return [Integer]
+            def foo
+              1
+            end
+
+            # @deprecated
+            # @return [String]
+            attr_reader :name
+
+            # @deprecated
+            # @return [Integer]
+            LIMIT = 3
+
+            # @return [Integer]
+            def current
+              2
+            end
+          end
+        RUBY
+
+        Yarbs.generate(["lib/**/*.rb"], output_dir: "sig", strict: true)
+        contents = File.read("sig/legacy.rbs")
+
+        assert_includes contents, "%a{deprecated: Use NewLegacy instead.}\nclass Legacy"
+        assert_includes contents, "%a{deprecated: Use #bar instead, it's faster.}\n  def foo: () -> Integer"
+        assert_includes contents, "%a{deprecated}\n  attr_reader name: String"
+        assert_includes contents, "%a{deprecated}\n  LIMIT: Integer"
+        refute_match(/deprecated\}\n  def current/, contents)
+
+        _, _, decls = RBS::Parser.parse_signature(contents)
+        assert_equal ["deprecated"], decls.first.members.find { |m| m.is_a?(RBS::AST::Declarations::Constant) }.annotations.map(&:string)
+      end
+    end
+  end
 end

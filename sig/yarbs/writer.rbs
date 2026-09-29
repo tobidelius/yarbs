@@ -1,0 +1,11 @@
+module Yarbs
+  # An +RBS::Writer+ that also writes a constant's annotations, which the
+  # stock writer drops (even though the RBS parser accepts +%a{...}+ on a
+  # constant, and Steep reads it). Without this, a +@deprecated+ constant
+  # would silently lose the +%a{deprecated}+ that {Annotator} gives it.
+  class Writer < RBS::Writer
+    private
+
+    def write_decl: (untyped decl) -> untyped
+  end
+end

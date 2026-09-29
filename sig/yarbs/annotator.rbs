@@ -68,6 +68,13 @@ module Yarbs
 
     def return_types_of: (untyped yard_object) -> (::Array[untyped] | untyped)
 
+    # Appends a `%a{deprecated}` annotation when the YARD object has a
+    # `@deprecated` tag, which Steep reports as `Ruby::DeprecatedReference`
+    # wherever the declaration is used. The tag's text becomes the message
+    # (`%a{deprecated: Use #bar instead}`), flattened onto one line since
+    # Steep only reads the message up to the first newline.
+    def with_deprecation: (untyped annotations, untyped yard_object) -> untyped
+
     def convert: (untyped types) -> untyped
 
     def safe_symbol: (untyped name) -> (nil | untyped)

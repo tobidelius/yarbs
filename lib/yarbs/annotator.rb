@@ -30,7 +30,10 @@ module Yarbs
       case decl
       when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
         inner_namespace = namespace + [decl.name.to_s]
-        decl.update(members: visit_all(decl.members, inner_namespace))
+        decl.update(
+          members: visit_all(decl.members, inner_namespace),
+          annotations: with_deprecation(decl.annotations, YARD::Registry.at(inner_namespace.join("::")))
+        )
       when RBS::AST::Declarations::Constant
         annotate_constant(decl, namespace)
       when RBS::AST::Members::MethodDefinition
@@ -47,14 +50,13 @@ module Yarbs
     def annotate_constant(decl, namespace)
       yard_object = YARD::Registry.at("#{namespace.join("::")}::#{decl.name}")
       types = return_types_of(yard_object)
-      return decl if types.empty?
 
       RBS::AST::Declarations::Constant.new(
         name: decl.name,
-        type: convert(types),
+        type: types.empty? ? decl.type : convert(types),
         location: decl.location,
         comment: decl.comment,
-        annotations: decl.annotations
+        annotations: with_deprecation(decl.annotations, yard_object)
       )
     end
 
@@ -64,7 +66,7 @@ module Yarbs
       return member unless yard_method
 
       overloads = member.overloads.map { |overload| annotate_overload(overload, yard_method) }
-      member.update(overloads: overloads)
+      member.update(overloads: overloads, annotations: with_deprecation(member.annotations, yard_method))
     end
 
     def annotate_attribute(member, namespace)
@@ -75,9 +77,11 @@ module Yarbs
       suffix = member.is_a?(RBS::AST::Members::AttrWriter) ? "=" : ""
       yard_attr = YARD::Registry.at("#{namespace.join("::")}#{sep}#{member.name}#{suffix}")
       types = return_types_of(yard_attr)
-      return member if types.empty?
 
-      member.update(type: convert(types))
+      member.update(
+        type: types.empty? ? member.type : convert(types),
+        annotations: with_deprecation(member.annotations, yard_attr)
+      )
     end
 
     def annotate_overload(overload, yard_method)
@@ -261,6 +265,24 @@ module Yarbs
       return [] unless yard_object
 
       yard_object.tags(:return).flat_map { |tag| tag.types || [] }
+    end
+
+    # Appends a `%a{deprecated}` annotation when the YARD object has a
+    # `@deprecated` tag, which Steep reports as `Ruby::DeprecatedReference`
+    # wherever the declaration is used. The tag's text becomes the message
+    # (`%a{deprecated: Use #bar instead}`), flattened onto one line since
+    # Steep only reads the message up to the first newline.
+    def with_deprecation(annotations, yard_object)
+      tag = yard_object&.tag(:deprecated)
+      return annotations unless tag
+
+      message = tag.text.to_s.split.join(" ")
+      string = message.empty? ? "deprecated" : "deprecated: #{message}"
+      # RBS::Writer picks whichever %a delimiter pair doesn't appear in the
+      # string, and raises if every one of them does.
+      string = "deprecated" if ["}", ")", "]", ">", "|"].all? { |char| string.include?(char) }
+
+      annotations + [RBS::AST::Annotation.new(string: string, location: nil)]
     end
 
     def convert(types)

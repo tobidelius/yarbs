@@ -49,7 +49,7 @@ module Yarbs
 
       out_path = @output_dir.join(relative_sig_path(file))
       out_path.dirname.mkpath
-      out_path.open("w") { |io| RBS::Writer.new(out: io).write(annotated) }
+      out_path.open("w") { |io| Writer.new(out: io).write(annotated) }
 
       out_path
     rescue SyntaxError => e
