@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/tobidelius/yarbs/actions/workflows/ci.yml/badge.svg)](https://github.com/tobidelius/yarbs/actions/workflows/ci.yml)
 
-*This is still retied. Use [Inline RBS](https://github.com/ruby/rbs/blob/master/docs/inline.md)*
+*This is retied. Use [Inline RBS](https://github.com/ruby/rbs/blob/master/docs/inline.md)*
 
 ---
 
